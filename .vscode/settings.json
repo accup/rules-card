@@ -13,5 +13,8 @@
   },
   "[vue]": {
     "editor.defaultFormatter": "johnsoncodehk.volar"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }
