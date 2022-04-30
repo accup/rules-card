@@ -58,6 +58,75 @@ function* partition(
   yield* partition(source, prototypes, index + 1, parts)
 }
 
+interface SubPrototype {
+  count: bigint
+  prototype: Part
+}
+
+function* splitSubPrototypes(prototype: Part): Iterable<SubPrototype> {
+  for (const [
+    count,
+    namedComplements,
+  ] of prototype.countNamedComplementsMap.entries()) {
+    yield {
+      count,
+      prototype: {
+        pattern: prototype.pattern,
+        countNamedComplementsMap: new Map([[count, namedComplements]]),
+      },
+    }
+  }
+}
+
+function* partitionWithTotalComplementCount(
+  source: CardSet,
+  prototypes: readonly Part[],
+  index: number,
+  parts: Part[],
+  totalComplementCount: bigint,
+  targetTotalComplementCount: bigint,
+): Generator<PartitionResult, void, undefined> {
+  if (totalComplementCount > targetTotalComplementCount) {
+    return
+  }
+
+  if (index >= prototypes.length) {
+    if (
+      totalComplementCount + source.totalCount() ===
+      targetTotalComplementCount
+    ) {
+      yield { rest: source.clone(), parts: [...parts] }
+    }
+    return
+  }
+
+  const prototype = prototypes[index]
+  const rest = tryExtract(source, prototype.pattern)
+  if (rest != null) {
+    for (const subPrototype of splitSubPrototypes(prototype)) {
+      parts.push(subPrototype.prototype)
+      yield* partitionWithTotalComplementCount(
+        rest,
+        prototypes,
+        index,
+        parts,
+        totalComplementCount + subPrototype.count,
+        targetTotalComplementCount,
+      )
+      parts.pop()
+    }
+  }
+
+  yield* partitionWithTotalComplementCount(
+    source,
+    prototypes,
+    index + 1,
+    parts,
+    totalComplementCount,
+    targetTotalComplementCount,
+  )
+}
+
 function makePrototypeKey(sortedCards: string[]): string {
   return JSON.stringify(sortedCards)
 }
@@ -150,12 +219,16 @@ interface PartitionOptions {
   complementCount?: bigint
   minComplementCount?: bigint
   maxComplementCount?: bigint
+  totalComplementCount?: bigint
 }
 
 class Partitioner {
   prototypes: Part[]
+  totalComplementCount?: bigint
 
   constructor(prototypeStore: PrototypeStore, options: PartitionOptions = {}) {
+    this.totalComplementCount = options.totalComplementCount
+
     this.prototypes = [
       ...iterate(prototypeStore.prototypeMap.values())
         .map((originalPrototype): Part => {
@@ -197,7 +270,18 @@ class Partitioner {
   }
 
   partition(source: CardSet): Iterable<PartitionResult> {
-    return partition(source, this.prototypes, 0, [])
+    if (this.totalComplementCount == null) {
+      return partition(source, this.prototypes, 0, [])
+    } else {
+      return partitionWithTotalComplementCount(
+        source,
+        this.prototypes,
+        0,
+        [],
+        0n,
+        this.totalComplementCount,
+      )
+    }
   }
 }
 
