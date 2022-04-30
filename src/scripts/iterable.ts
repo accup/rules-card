@@ -7,6 +7,17 @@ function* map<T, U>(
   }
 }
 
+function* filter<T>(
+  iterable: Iterable<T>,
+  predicate: (item: T) => boolean,
+): Iterable<T> {
+  for (const item of iterable) {
+    if (predicate(item)) {
+      yield item
+    }
+  }
+}
+
 class Iteration<T> {
   private iterable: Iterable<T>
 
@@ -20,6 +31,18 @@ class Iteration<T> {
 
   map<U>(convert: (item: T) => U): Iteration<U> {
     return iterate(map(this, convert))
+  }
+
+  reduce<U>(initialValue: U, accumulate: (lastValue: U, item: T) => U): U {
+    let value = initialValue
+    for (const item of this.iterable) {
+      value = accumulate(value, item)
+    }
+    return value
+  }
+
+  filter(predicate: (item: T) => boolean): Iteration<T> {
+    return iterate(filter(this, predicate))
   }
 
   some(predicate: (item: T) => boolean): boolean {
