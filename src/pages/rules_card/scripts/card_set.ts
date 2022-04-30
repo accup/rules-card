@@ -1,7 +1,7 @@
 import { ascendingCompare } from '@/scripts/compare'
 import { iterate } from '@/scripts/iterable'
 
-export class Hand {
+export class CardSet {
   private cardCountMap: Map<string, bigint>
 
   constructor(iterable?: Iterable<[string, bigint]>) {
@@ -66,8 +66,8 @@ export class Hand {
     }
   }
 
-  clone(): Hand {
-    return new Hand(this.cardCountPairs)
+  clone(): CardSet {
+    return new CardSet(this.cardCountPairs)
   }
 
   toString(): string {

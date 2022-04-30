@@ -1,2 +1,2 @@
-export { Hand } from './hand'
+export { CardSet } from './card_set'
 export { RulesCard } from './rules_card'

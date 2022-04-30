@@ -1,7 +1,7 @@
 import { iterate } from '@/scripts/iterable'
-import { Hand } from './hand'
+import { CardSet } from './card_set'
 
-function tryExtract(source: Hand, pattern: Hand): Hand | null {
+function tryExtract(source: CardSet, pattern: CardSet): CardSet | null {
   if (iterate(pattern.cardCountPairs).every(([_, count]) => count <= 0)) {
     return null
   }
@@ -23,21 +23,21 @@ function tryExtract(source: Hand, pattern: Hand): Hand | null {
 
 interface NamedComplement {
   name: string
-  complement: Hand
+  complement: CardSet
 }
 
 interface Part {
-  pattern: Hand
+  pattern: CardSet
   countNamedComplementsMap: Map<bigint, NamedComplement[]>
 }
 
 interface PartitionResult {
-  rest: Hand
+  rest: CardSet
   parts: Part[]
 }
 
 function* partition(
-  source: Hand,
+  source: CardSet,
   prototypes: readonly Part[],
   index: number,
   parts: Part[],
@@ -63,37 +63,37 @@ function makePrototypeKey(sortedCards: string[]): string {
 }
 
 function* makeCardSubsets(
-  cardsetCardCountPairs: [string, bigint][],
+  cardSetCardCountPairs: [string, bigint][],
   index: number,
-  cardSubset: Hand,
-): Iterable<Hand> {
-  if (index >= cardsetCardCountPairs.length) {
+  cardSubset: CardSet,
+): Iterable<CardSet> {
+  if (index >= cardSetCardCountPairs.length) {
     yield cardSubset.clone()
     return
   }
 
-  yield* makeCardSubsets(cardsetCardCountPairs, index + 1, cardSubset)
+  yield* makeCardSubsets(cardSetCardCountPairs, index + 1, cardSubset)
 
-  const [card, maxCount] = cardsetCardCountPairs[index]
+  const [card, maxCount] = cardSetCardCountPairs[index]
   for (let count = 0n; count < maxCount; ++count) {
     cardSubset.add(card, 1n)
-    yield* makeCardSubsets(cardsetCardCountPairs, index + 1, cardSubset)
+    yield* makeCardSubsets(cardSetCardCountPairs, index + 1, cardSubset)
   }
   cardSubset.remove(card, maxCount)
 }
 
-function makeComplementCardset(cardset: Hand, cardSubset: Hand): Hand {
-  const complementCardset = cardset.clone()
+function makeComplementCardSet(cardSet: CardSet, cardSubset: CardSet): CardSet {
+  const complementCardSet = cardSet.clone()
   for (const [card, count] of cardSubset.cardCountPairs) {
-    complementCardset.remove(card, count)
+    complementCardSet.remove(card, count)
   }
-  return complementCardset
+  return complementCardSet
 }
 
 class PrototypeStore {
   prototypeMap: Map<string, Part> = new Map()
 
-  setDefaultPrototype(cardSubset: Hand): Part {
+  setDefaultPrototype(cardSubset: CardSet): Part {
     const key = makePrototypeKey(cardSubset.sortedCards())
     const prototype = this.prototypeMap.get(key)
     if (prototype == null) {
@@ -109,8 +109,8 @@ class PrototypeStore {
   }
 
   setDefaultNamedComplements(
-    cardSubset: Hand,
-    complement: Hand,
+    cardSubset: CardSet,
+    complement: CardSet,
   ): NamedComplement[] {
     const prototype = this.setDefaultPrototype(cardSubset)
 
@@ -126,12 +126,16 @@ class PrototypeStore {
     }
   }
 
-  registerCardset(name: string, cardset: Hand): void {
-    const cardCountPairs = [...cardset.cardCountPairs]
+  registerCardSet(name: string, cardSet: CardSet): void {
+    const cardCountPairs = [...cardSet.cardCountPairs]
 
-    for (const cardSubset of makeCardSubsets(cardCountPairs, 0, new Hand())) {
+    for (const cardSubset of makeCardSubsets(
+      cardCountPairs,
+      0,
+      new CardSet(),
+    )) {
       if (cardSubset.totalCount() > 0n) {
-        const complement = makeComplementCardset(cardset, cardSubset)
+        const complement = makeComplementCardSet(cardSet, cardSubset)
         const namedComplements = this.setDefaultNamedComplements(
           cardSubset,
           complement,
@@ -192,7 +196,7 @@ class Partitioner {
     ]
   }
 
-  partition(source: Hand): Iterable<PartitionResult> {
+  partition(source: CardSet): Iterable<PartitionResult> {
     return partition(source, this.prototypes, 0, [])
   }
 }
@@ -200,12 +204,12 @@ class Partitioner {
 export class RulesCard {
   private prototypeStore: PrototypeStore = new PrototypeStore()
 
-  registerCardset(name: string, cardset: Hand): void {
-    this.prototypeStore.registerCardset(name, cardset)
+  registerCardSet(name: string, cardSet: CardSet): void {
+    this.prototypeStore.registerCardSet(name, cardSet)
   }
 
   partition(
-    source: Hand,
+    source: CardSet,
     options?: PartitionOptions,
   ): Iterable<PartitionResult> {
     return new Partitioner(this.prototypeStore, options).partition(source)
