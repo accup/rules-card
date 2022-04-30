@@ -21,17 +21,17 @@ function tryExtract(source: CardSet, pattern: CardSet): CardSet | null {
   return rest
 }
 
-interface NamedComplement {
+export interface NamedComplement {
   name: string
   complement: CardSet
 }
 
-interface Part {
+export interface Part {
   pattern: CardSet
   countNamedComplementsMap: Map<bigint, NamedComplement[]>
 }
 
-interface PartitionResult {
+export interface PartitionResult {
   rest: CardSet
   parts: Part[]
 }
