@@ -144,8 +144,8 @@ function* makeCardSubsets(
   yield* makeCardSubsets(cardSetCardCountPairs, index + 1, cardSubset)
 
   const [card, maxCount] = cardSetCardCountPairs[index]
-  for (let count = 0n; count < maxCount; ++count) {
-    cardSubset.add(card, 1n)
+  for (let count = BigInt('0'); count < maxCount; ++count) {
+    cardSubset.add(card, BigInt('1'))
     yield* makeCardSubsets(cardSetCardCountPairs, index + 1, cardSubset)
   }
   cardSubset.remove(card, maxCount)
@@ -203,7 +203,7 @@ class PrototypeStore {
       0,
       new CardSet(),
     )) {
-      if (cardSubset.totalCount() > 0n) {
+      if (cardSubset.totalCount() > BigInt('0')) {
         const complement = makeComplementCardSet(cardSet, cardSubset)
         const namedComplements = this.setDefaultNamedComplements(
           cardSubset,
@@ -278,7 +278,7 @@ class Partitioner {
         this.prototypes,
         0,
         [],
-        0n,
+        BigInt('0'),
         this.totalComplementCount,
       )
     }

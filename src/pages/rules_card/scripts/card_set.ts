@@ -14,13 +14,13 @@ export class CardSet {
 
   totalCount(): bigint {
     return iterate(this.cardCountMap.values()).reduce(
-      0n,
+      BigInt('0'),
       (lastTotalCount, count) => lastTotalCount + count,
     )
   }
 
   count(card: string): bigint {
-    return this.cardCountMap.get(card) ?? 0n
+    return this.cardCountMap.get(card) ?? BigInt('0')
   }
 
   sortedCards(): string[] {
@@ -34,24 +34,24 @@ export class CardSet {
     return sortedCards
   }
 
-  add(card: string, count: bigint = 1n): void {
-    if (count < 0n) {
+  add(card: string, count: bigint = BigInt('1')): void {
+    if (count < BigInt('0')) {
       throw new Error(`'count' (${count}) must be a non-zero integer.`)
     }
 
-    const lastCount = this.cardCountMap.get(card) ?? 0n
+    const lastCount = this.cardCountMap.get(card) ?? BigInt('0')
     const nextCount = lastCount + count
-    if (nextCount > 0n) {
+    if (nextCount > BigInt('0')) {
       this.cardCountMap.set(card, nextCount)
     }
   }
 
-  remove(card: string, count: bigint = 1n): void {
-    if (count < 0n) {
+  remove(card: string, count: bigint = BigInt('1')): void {
+    if (count < BigInt('0')) {
       throw new Error(`'count' (${count}) must be a non-zero integer.`)
     }
 
-    const lastCount = this.cardCountMap.get(card) ?? 0n
+    const lastCount = this.cardCountMap.get(card) ?? BigInt('0')
     if (count > lastCount) {
       throw new Error(
         `'count' (${count}) must be less than or equal to the last count (${lastCount}).`,
@@ -59,7 +59,7 @@ export class CardSet {
     }
 
     const nextCount = lastCount - count
-    if (nextCount <= 0n) {
+    if (nextCount <= BigInt('0')) {
       this.cardCountMap.delete(card)
     } else {
       this.cardCountMap.set(card, nextCount)
