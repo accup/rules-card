@@ -1,3 +1,11 @@
+<script setup lang="ts">
+import Main from '@/components/Main/index.vue'
+</script>
+
 <template>
-  <router-view></router-view>
+  <Main />
 </template>
+
+<style lang="scss">
+@use './App.module.scss';
+</style>

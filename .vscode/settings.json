@@ -12,7 +12,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[vue]": {
-    "editor.defaultFormatter": "johnsoncodehk.volar"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[scss]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
