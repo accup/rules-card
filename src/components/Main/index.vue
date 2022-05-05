@@ -59,7 +59,7 @@ class CardTagger {
 const cardSetText = ref('234234234m222p5m 5m')
 const cardSet = computed((): Multiset<string> => {
   const cardSet = new Multiset(new CardTagger())
-  for (const match of cardSetText.value.matchAll(/(\d+)([^\d\W])/g)) {
+  for (const match of cardSetText.value.matchAll(/(\d+)(\p{L})/g)) {
     const numbers = match[1]
     const kind = match[2]
     for (const numberMatch of numbers.matchAll(/\d/g)) {
