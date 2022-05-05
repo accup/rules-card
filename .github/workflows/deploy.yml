@@ -30,6 +30,8 @@ jobs:
     - run: npm run build
     - run: cd dist
     - run: git init
+    - run: git config user.name github-actions
+    - run: git config user.email github-actions@github.com
     - run: git checkout -b gh-pages
     - run: git add -A
     - run: git commit -m 'deploy'
