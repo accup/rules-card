@@ -33,6 +33,5 @@ jobs:
       working-directory: ./dist
     - run: git commit -m 'deploy'
       working-directory: ./dist
-    - run: echo ${{ github.actor }}
     - run: git push -f https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages
       working-directory: ./dist
