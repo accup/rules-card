@@ -33,5 +33,5 @@ jobs:
       working-directory: ./dist
     - run: git commit -m 'deploy'
       working-directory: ./dist
-    - run: git push -f https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages
+    - run: git push -f origin gh-pages
       working-directory: ./dist
