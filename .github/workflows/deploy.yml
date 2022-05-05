@@ -21,6 +21,8 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build
+    - run: touch .nojekyll
+      working-directory: ./dist
     - run: git init
       working-directory: ./dist
     - run: git config user.name github-actions
