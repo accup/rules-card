@@ -1,3 +1,4 @@
-export { CardSet } from './card_set'
-export type { Part, PartitionResult, NamedComplement } from './rules_card'
-export { RulesCard } from './rules_card'
+export type { Tagger } from './tagger'
+export { Multiset } from './multiset'
+export type { Sample, Tagged } from './multiset'
+export { Multisubset } from './multisubset'
