@@ -11,29 +11,27 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [12.x, 14.x, 16.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 16.x
         cache: 'npm'
     - run: npm ci
     - run: npm run build
-    - run: cd dist
     - run: git init
+      working-directory: ./dist
     - run: git config user.name github-actions
+      working-directory: ./dist
     - run: git config user.email github-actions@github.com
+      working-directory: ./dist
     - run: git checkout -b gh-pages
+      working-directory: ./dist
     - run: git add -A
+      working-directory: ./dist
     - run: git commit -m 'deploy'
+      working-directory: ./dist
     - run: git push -f https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages
-    - run: cd -
+      working-directory: ./dist
