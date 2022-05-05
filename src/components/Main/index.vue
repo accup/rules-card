@@ -5,63 +5,72 @@ import styles from './index.module.scss'
 import { ref, computed } from 'vue'
 
 import { iterate } from '@/scripts/iterable'
-import { CardSet, RulesCard } from '@/scripts/rules_card'
+import { Multiset } from '@/scripts/rules_card'
 
-const MAN_KIND = 'm'
-const PIN_KIND = 'p'
-const SOU_KIND = 's'
-const JI_KIND = 'z'
-const SU_KINDS = [MAN_KIND, PIN_KIND, SOU_KIND]
+// const MAN_KIND = 'm'
+// const PIN_KIND = 'p'
+// const SOU_KIND = 's'
+// const JI_KIND = 'z'
+// const SU_KINDS = [MAN_KIND, PIN_KIND, SOU_KIND]
 
-const rulesCard = new RulesCard()
+// const rulesCard = new RulesCard()
 
-for (const kind of SU_KINDS) {
-  for (let number = 1; number <= 7; ++number) {
-    rulesCard.registerCardSet(
-      '順子',
-      new CardSet([
-        [`${number}${kind}`, BigInt('1')],
-        [`${number + 1}${kind}`, BigInt('1')],
-        [`${number + 2}${kind}`, BigInt('1')],
-      ]),
-    )
-  }
-}
+// for (const kind of SU_KINDS) {
+//   for (let number = 1; number <= 7; ++number) {
+//     rulesCard.registerCardSet(
+//       '順子',
+//       new CardSet([
+//         [`${number}${kind}`, BigInt('1')],
+//         [`${number + 1}${kind}`, BigInt('1')],
+//         [`${number + 2}${kind}`, BigInt('1')],
+//       ]),
+//     )
+//   }
+// }
 
-const pairs: [string, bigint][] = [
-  ['対子', BigInt('2')],
-  ['刻子', BigInt('3')],
-  ['槓子', BigInt('4')],
-]
-for (const [name, count] of pairs) {
-  for (const kind of SU_KINDS) {
-    for (let number = 1; number <= 9; ++number) {
-      rulesCard.registerCardSet(
-        name,
-        new CardSet([[`${number}${kind}`, count]]),
-      )
-    }
-  }
-  for (let number = 1; number <= 7; ++number) {
-    rulesCard.registerCardSet(
-      name,
-      new CardSet([[`${number}${JI_KIND}`, count]]),
-    )
+// const pairs: [string, bigint][] = [
+//   ['対子', BigInt('2')],
+//   ['刻子', BigInt('3')],
+//   ['槓子', BigInt('4')],
+// ]
+// for (const [name, count] of pairs) {
+//   for (const kind of SU_KINDS) {
+//     for (let number = 1; number <= 9; ++number) {
+//       rulesCard.registerCardSet(
+//         name,
+//         new CardSet([[`${number}${kind}`, count]]),
+//       )
+//     }
+//   }
+//   for (let number = 1; number <= 7; ++number) {
+//     rulesCard.registerCardSet(
+//       name,
+//       new CardSet([[`${number}${JI_KIND}`, count]]),
+//     )
+//   }
+// }
+
+class CardTagger {
+  tag(item: string): string {
+    return item
   }
 }
 
 const cardSetText = ref('')
-const cardSet = computed((): CardSet => {
-  const cardCountMap = new Map<string, bigint>()
-  for (const match of cardSetText.value.matchAll(/[0-9A-Za-z]/g)) {
-    const card = match[0]
-    const lastCount = cardCountMap.get(card) ?? BigInt('0')
-    cardCountMap.set(card, lastCount + BigInt('1'))
+const cardSet = computed((): Multiset<string> => {
+  const cardSet = new Multiset(new CardTagger())
+  for (const match of cardSetText.value.matchAll(/(\d+)([^\d\W])/g)) {
+    const numbers = match[1]
+    const kind = match[2]
+    for (const numberMatch of numbers.matchAll(/\d/g)) {
+      const number = numberMatch[0]
+      cardSet.add(`${number}${kind}`)
+    }
   }
-  return new CardSet(cardCountMap.entries())
+  return cardSet
 })
-const cardCountList = computed((): [string, bigint][] => {
-  return [...cardSet.value.cardCountPairs]
+const cardCountList = computed((): [string, number][] => {
+  return [...cardSet.value.tags()].map((tag) => [tag, cardSet.value.count(tag)])
 })
 
 // for (const result of rulesCard.partition(hand, { complementCount: 0 })) {
